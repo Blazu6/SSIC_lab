@@ -46,7 +46,7 @@ def run_experiment(file_path, key_size):
   
 
 if __name__ == "__main__":
-    target_file = "test.dat" 
+    target_file = "test.mp4" 
     
     if os.path.exists(target_file):
         for size in [128, 192, 256]:
