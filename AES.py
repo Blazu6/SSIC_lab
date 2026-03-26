@@ -7,10 +7,7 @@ def process_aes_cfb(input_path, output_path, key, iv, mode='encrypt'):
     # Bufor 2MB 
     buffer_size = 2 * 1024 * 1024
     
-    if mode == 'encrypt':
-        cipher = AES.new(key, AES.MODE_CFB, iv=iv, segment_size=128)
-    else:
-        cipher = AES.new(key, AES.MODE_CFB, iv=iv, segment_size=128)
+    cipher = AES.new(key, AES.MODE_CFB, iv=iv, segment_size=128)
         
     with open(input_path, 'rb') as f_in, open(output_path, 'wb') as f_out:
         while True:
