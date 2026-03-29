@@ -1,0 +1,67 @@
+import os
+import time
+from Crypto.Cipher import DES3
+
+MB = 1024 * 1024
+
+def process_file(input_path, output_path, key, iv, mode='encrypt'):
+    buffer_size = 1 * MB
+    cipher = DES3.new(key, DES3.MODE_OFB, iv=iv)
+    
+    with open(input_path, 'rb') as f_in, open(output_path, 'wb') as f_out:
+        while True:
+            chunk = f_in.read(buffer_size)
+            if not chunk:
+                break
+            if mode == 'encrypt':
+                f_out.write(cipher.encrypt(chunk))
+            else:
+                f_out.write(cipher.decrypt(chunk))
+
+
+def verify_files(path1, path2):
+    if os.path.getsize(path1) != os.path.getsize(path2):
+        return False
+    with open(path1, 'rb') as f1, open(path2, 'rb') as f2:
+        while True:
+            b1, b2 = f1.read(1 * MB), f2.read(1 * MB)
+            if b1 != b2: return False
+            if not b1: return True
+
+if __name__ == "__main__":
+    files_name = ["TRNG_F.bit", "TRNG_P.bit"]  
+    encrypted_files = ["zaszyfrowany_3DES_f.bit", "zaszyfrowany_3DES_p.bit"]
+    decrypted_files = ["odszyfrowany_3DES_f.bit", "odszyfrowany_3DES_p.bit"]
+
+    for file_name, encrypted_file, decrypted_file in zip(files_name, encrypted_files, decrypted_files):
+        if not os.path.exists(file_name):
+            print(f"BŁĄD: Nie znaleziono pliku {file_name}!")
+        else:
+            print("Generowanie bezpiecznego klucza...")
+            key = os.urandom(24)
+            iv = os.urandom(8)
+
+            print(f"Szyfrowanie pliku {file_name}...")
+            start_enc = time.time()
+            process_file(file_name, encrypted_file, key, iv)
+            enc_time = time.time() - start_enc
+            
+            print("Odszyfrowywanie...")
+            start_dec = time.time()
+            process_file(encrypted_file, decrypted_file, key, iv, mode='decrypt')
+            dec_time = time.time() - start_dec
+
+            print("\n=== WYNIKI EKSPERYMENTU ===")
+            size_gb = os.path.getsize(file_name) / (1024**3)
+            print(f"Rozmiar pliku: {size_gb:.2f} GB")
+            print(f"Czas szyfrowania: {enc_time:.3f} s")
+            print(f"Czas deszyfrowania: {dec_time:.3f} s")
+            print(f"Średnia prędkość szyfrowania: { (size_gb * 1024) / enc_time:.2f} MB/s")
+            print(f"Średnia prędkość deszyfrowania: { (size_gb * 1024) / dec_time:.2f} MB/s")
+            
+            if verify_files(file_name, decrypted_file):
+                print("\nWeryfikacja: SUKCES (Pliki są identyczne)")
+                print(f"Możesz teraz otworzyć plik: {decrypted_file}")
+            else:
+                print("\nWeryfikacja: BŁĄD! Coś poszło nie tak.")
+            print("===========================")
