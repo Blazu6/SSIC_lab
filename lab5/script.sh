@@ -3,7 +3,7 @@
 rm -rf run_*.bit
 rm -f templates/templates
 
-files=("TRNG_F.bit" "TRNG_P.bit")
+files=("same_zera_sha3_256.bit" "same_zera_sha3_512.bit" "TRNG_P_sha3_256.bit" "TRNG_P_sha3_512.bit")
 bitestream=100
 LENGTH=1000000
 
