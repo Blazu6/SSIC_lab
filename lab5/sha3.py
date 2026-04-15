@@ -24,6 +24,25 @@ def sha3_256(input_path: str, output_path: str) -> int:
         print(f"Wystąpił błąd podczas odczytu lub zapisu pliku: {e}")
         return None
 
+def sha3_512_salted(input_path: str, output_path: str) -> int:
+    count = 0
+    try:
+        with open(input_path, 'rb') as f, open(output_path, 'wb') as out_file:
+            while chunk := f.read(256): # Dla 512 czytamy 256 bajtów (proporcja 4:1)
+                count += 1
+                counter_bytes = count.to_bytes(8, byteorder='big')
+                
+                # Zastępujemy ostatnie 8 bajtów z 256-bajtowego bloku
+                salted_chunk = chunk[:-8] + counter_bytes
+                
+                h = SHA3_512.new()
+                h.update(salted_chunk)
+                out_file.write(h.digest())
+        return count
+    except Exception as e:
+        print(f"Błąd: {e}")
+        return None
+
 def sha3_512(input_path: str, output_path: str) -> int:
     count = 0
 
@@ -59,10 +78,14 @@ if __name__ == "__main__":
     #pliki wyjsciowe 512
     output_file_512_1 = 'same_zera_sha3_512.bit'
     output_file_512_2 = 'TRNG_P_sha3_512_2.bit'
+    #plik wyjsciowy salted
+    output_file_salted = 'same_zera_salted_sha3_256.bit'
     
-    print(f"--- Rozpoczynam pracę na pliku: {input_file1} ---")
-    res1 = sha3_256(input_file1, output_file_256_1)
-    res1_512 = sha3_512(input_file1, output_file_512_1)
-    print(f"Rozpoczynam praceę na pliku: {input_file2} ---")
-    res2 = sha3_256(input_file2, output_file_256_2)
-    res2_512 = sha3_512(input_file2, output_file_512_2)
+    #print(f"--- Rozpoczynam pracę na pliku: {input_file1} ---")
+    #res1 = sha3_256(input_file1, output_file_256_1)
+    #res1_512 = sha3_512(input_file1, output_file_512_1)
+    #print(f"Rozpoczynam praceę na pliku: {input_file2} ---")
+    #res2 = sha3_256(input_file2, output_file_256_2)
+    #res2_512 = sha3_512(input_file2, output_file_512_2)
+
+    res1_salted = sha3_512_salted(input_file1, output_file_salted)
